@@ -1,22 +1,20 @@
 package com.stoom.testequalificacao.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stoom.testequalificacao.model.Address;
 import com.stoom.testequalificacao.service.AddressService;
+import com.stoom.testequalificacao.service.GeocodingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 //@Controller
 @RestController
@@ -24,7 +22,10 @@ import java.util.List;
 public class AddressController {
 
     @Autowired
-    AddressService addressService;
+    private AddressService addressService;
+
+    @Autowired
+    private GeocodingService geocodingService;
 
     @GetMapping
     public ResponseEntity<List<Address>> getAllAddress(){
@@ -44,7 +45,12 @@ public class AddressController {
             attributes.addFlashAttribute("message", "Verifique os campos obrigatórios!");
             return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, "/address").build();
         }
-        addressService.save(address);
+
+        if(Objects.isNull(address.getLatitude()) || Objects.isNull(address.getLatitude())){
+            address = geocodingService.generateLinkGeocoding(address);
+            addressService.save(address);
+        }else
+            addressService.save(address);
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, "/address").build();
     }
 
@@ -53,4 +59,23 @@ public class AddressController {
         addressService.deleteById(id);
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, "/address").build();
     }
+
+    @PutMapping("/newaddress/{id}")
+    public ResponseEntity<Address> updateAddress(@PathVariable("id") long id, @RequestBody @Valid Address address, BindingResult result, RedirectAttributes attributes) throws JsonProcessingException {
+        Address addressResponse;
+        if(result.hasErrors()){
+            attributes.addFlashAttribute("message", "Verifique os campos obrigatórios!");
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, "/address").build();
+        }
+
+        if(Objects.isNull(address.getLatitude()) || Objects.isNull(address.getLatitude())){
+            address = geocodingService.generateLinkGeocoding(address);
+            addressResponse = addressService.updateAddressById(id, address);
+        }else
+            addressResponse = addressService.updateAddressById(id, address);
+
+        return ResponseEntity.ok(addressResponse);
+    }
+
+
 }

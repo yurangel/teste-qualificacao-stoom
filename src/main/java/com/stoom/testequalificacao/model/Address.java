@@ -34,8 +34,8 @@ public class Address {
     @NotBlank
     public String zipcode;
 
-    public Long latitude;
-    public Long longitude;
+    public String latitude;
+    public String longitude;
 
     public Long getId() {
         return id;
@@ -109,19 +109,19 @@ public class Address {
         this.zipcode = zipcode;
     }
 
-    public Long getLatitude() {
+    public String getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Long latitude) {
+    public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
 
-    public Long getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Long longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 }
