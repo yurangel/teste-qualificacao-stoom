@@ -16,7 +16,6 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
-//@Controller
 @RestController
 @RequestMapping("/address")
 public class AddressController {
